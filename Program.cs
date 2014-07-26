@@ -10,7 +10,7 @@ namespace MergeCapturedPoses
 	{
 		static void Main(string[] args)
 		{
-			string root = @"E:\KinectCapture\newset";
+			string root = @"E:\KinectCapture\RawXML";
             string[] dirNames = Directory.GetDirectories(root);
             foreach (var d in dirNames) {
                 string[] fileNames = Directory.GetFiles(d, "*.pose.xml");
@@ -21,7 +21,9 @@ namespace MergeCapturedPoses
                     Dictionary<string, float[]> boneAngleDict = IPIMocapXmlToBvhFrame.GetBoneAngleDict(f);
                     var t = IPIMocapXmlToBvhFrame.RemapToBvhChannel(boneAngleDict);
                     foreach (var i in t) {
-                        writer.Write("{0} ", i);
+						// prevents scientific notations
+						var str = String.Format("{0:F6}", i);
+                        writer.Write("{0} ", str.TrimEnd("0".ToCharArray()));
                     }
                     writer.WriteLine();
                 }
