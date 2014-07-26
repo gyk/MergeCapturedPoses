@@ -14,8 +14,9 @@ namespace MergeCapturedPoses
 		{
 			var xdoc = XDocument.Load(xmlPath);
 			var poseData = xdoc.Element("PoseData");
-			string strArray = (string)poseData.Element("RootTranslation").Element("Translation").Attribute("value");
-			float[] translation = Array.ConvertAll(strArray.Split(' '), float.Parse);
+			//string strArray = (string)poseData.Element("RootTranslation").Element("Translation").Attribute("value");
+			//float[] translation = Array.ConvertAll(strArray.Split(' '), float.Parse);
+			float[] translation = BvhTemplate.TranslationTPose;
 
 			Dictionary<string, float[]> boneAngleDict = new Dictionary<string, float[]>();
 			foreach (var bone in poseData.Elements().Skip(1)) {
@@ -42,7 +43,11 @@ namespace MergeCapturedPoses
 			foreach (var joint in skeleton.JointList) {
 				int id;
 				if (skeleton.JointNameToId.TryGetValue(joint.Name, out id)) {
-					float[] angle = boneAngleDict[joint.Name];
+					float[] angle;
+					boneAngleDict.TryGetValue(joint.Name, out angle);
+					if (angle == null) {
+						angle = new float[3] { 0f, 0f, 0f };
+					}
 					for (int i = 0; i < 3; i++) {
 						bvhChannels[3 + id * 3 + i] = angle[2 - i];
 					}
