@@ -8,8 +8,8 @@ namespace MergeCapturedPoses
 {
 	class BvhTemplate
 	{
-		#region The string of DefaultModelHierarchy
-		public static readonly string DefaultModelHierarchy = @"HIERARCHY
+		#region String representing DefaultModelHierarchy
+		public static readonly string DefaultModelHierarchyPlain = @"HIERARCHY
 ROOT Hip
 {
 	OFFSET 0.000000 0.000000 0.000000
@@ -140,8 +140,178 @@ ROOT Hip
 		}
 	}
 }";
+
+		// Similar to DefaultModelHierarchyPlain, but with dummy nodes at branching joints.
+		public static readonly string DefaultModelHierarchyDummy = @"HIERARCHY
+ROOT Hip
+{
+	OFFSET 0.000000 0.000000 0.000000
+	CHANNELS 6 Xposition Yposition Zposition Zrotation Yrotation Xrotation
+	JOINT LowerSpineDummy
+	{
+		OFFSET 0 0 0
+		CHANNELS 3 Zrotation Yrotation Xrotation
+		JOINT LowerSpine
+		{
+			OFFSET 0.000 7.342 -4.513
+			CHANNELS 3 Zrotation Yrotation Xrotation
+			JOINT MiddleSpine
+			{
+				OFFSET 0.000 9.552 0.000
+				CHANNELS 3 Zrotation Yrotation Xrotation
+				JOINT Chest
+				{
+					OFFSET 0.000 13.460 0.000
+					CHANNELS 3 Zrotation Yrotation Xrotation
+					JOINT NeckDummy
+					{
+						OFFSET 0 0 0
+						CHANNELS 3 Zrotation Yrotation Xrotation
+						JOINT Neck
+						{
+							OFFSET 0.000 22.577 0.527
+							CHANNELS 3 Zrotation Yrotation Xrotation
+							JOINT Head
+							{
+								OFFSET 0.000 7.815 0.000
+								CHANNELS 3 Zrotation Yrotation Xrotation
+								End Site
+								{
+									OFFSET 0.000 17.367 0.000
+								}
+							}
+						}
+					}
+
+					JOINT RClavicleDummy
+					{
+						OFFSET 0 0 0
+						CHANNELS 3 Zrotation Yrotation Xrotation
+						JOINT RClavicle
+						{
+							OFFSET -2.779 20.840 0.000
+							CHANNELS 3 Zrotation Yrotation Xrotation
+							JOINT RShoulder
+							{
+								OFFSET -13.720 -3.473 0.869
+								CHANNELS 3 Zrotation Yrotation Xrotation
+								JOINT RForearm
+								{
+									OFFSET -27.472 -1.996 -1.202
+									CHANNELS 3 Zrotation Yrotation Xrotation
+									JOINT RHand
+									{
+										OFFSET -23.202 0.696 0.857
+										CHANNELS 3 Zrotation Yrotation Xrotation
+										End Site
+										{
+											OFFSET -13.904 -0.452 0.513
+										}
+									}
+								}
+							}
+						}
+					}
+
+					JOINT LClavicleDummy
+					{
+						OFFSET 0 0 0
+						CHANNELS 3 Zrotation Yrotation Xrotation
+						JOINT LClavicle
+						{
+							OFFSET 2.779 20.840 0.000
+							CHANNELS 3 Zrotation Yrotation Xrotation
+							JOINT LShoulder
+							{
+								OFFSET 13.720 -3.473 0.869
+								CHANNELS 3 Zrotation Yrotation Xrotation
+								JOINT LForearm
+								{
+									OFFSET 27.472 -1.996 -1.202
+									CHANNELS 3 Zrotation Yrotation Xrotation
+									JOINT LHand
+									{
+										OFFSET 23.202 0.696 0.857
+										CHANNELS 3 Zrotation Yrotation Xrotation
+										End Site
+										{
+											OFFSET 13.904 -0.452 0.513
+										}
+									}
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	JOINT RThighDummy
+	{
+		OFFSET 0 0 0
+		CHANNELS 3 Zrotation Yrotation Xrotation
+		JOINT RThigh
+		{
+			OFFSET -7.815 0.394 0.000
+			CHANNELS 3 Zrotation Yrotation Xrotation
+			JOINT RShin
+			{
+				OFFSET -0.434 -37.947 0.000
+				CHANNELS 3 Zrotation Yrotation Xrotation
+				JOINT RFoot
+				{
+					OFFSET 0.000 -39.349 -0.356
+					CHANNELS 3 Zrotation Yrotation Xrotation
+					JOINT RToe
+					{
+						OFFSET 0.000 -3.461 10.729
+						CHANNELS 3 Zrotation Yrotation Xrotation
+						End Site
+						{
+							OFFSET 0.000 0.000 5.959
+						}
+					}
+				}
+			}
+		}
+	}
+
+	JOINT LThighDummy
+	{
+		OFFSET 0 0 0
+		CHANNELS 3 Zrotation Yrotation Xrotation
+		JOINT LThigh
+		{
+			OFFSET 7.815 0.394 0.000
+			CHANNELS 3 Zrotation Yrotation Xrotation
+			JOINT LShin
+			{
+				OFFSET 0.434 -37.947 0.000
+				CHANNELS 3 Zrotation Yrotation Xrotation
+				JOINT LFoot
+				{
+					OFFSET 0.000 -39.349 -0.356
+					CHANNELS 3 Zrotation Yrotation Xrotation
+					JOINT LToe
+					{
+						OFFSET 0.000 -3.461 10.729
+						CHANNELS 3 Zrotation Yrotation Xrotation
+						End Site
+						{
+							OFFSET 0.000 0.000 5.959
+						}
+					}
+				}
+			}
+		}
+	}
+}";
+		public static readonly string DefaultModelHierarchy = DefaultModelHierarchyPlain;
 		#endregion
 
+		// For retargetting in MotionBuilder, the skeleton should be located in correct position.
+		public static readonly float[] TranslationTPose = { 0f, 83f, 0f };
 		private static string defaultModelMotionHeader = @"
 MOTION
 Frames: {0:D}
@@ -171,7 +341,11 @@ Frame Time: {1:F7}
 				BvhTemplate.nChannels = n;
 			}
 
-			int[] dummyAngles = new int[BvhTemplate.nChannels.Value];
+			float[] dummyAngles = new float[BvhTemplate.nChannels.Value];
+			for (int i = 0; i < 3; i++) {
+				dummyAngles[i] = BvhTemplate.TranslationTPose[i];
+			}
+
 			return model + String.Join(" ", dummyAngles) + "\n";
 		}
 
